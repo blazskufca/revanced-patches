@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/blazskufca/revanced-patches/compare/v1.0.0...v1.0.1) (2026-01-04)
+
+
+### Bug Fixes
+
+* UnlockPlusPatch for com.mladinska.mkplus ([a611eef](https://github.com/blazskufca/revanced-patches/commit/a611eef96f6a8251028fdacc616c7c006d00cd6e))
+
 # 1.0.0 (2026-01-04)
 
 
