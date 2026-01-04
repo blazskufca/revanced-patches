@@ -10,7 +10,7 @@ val unlockPlusPatch = bytecodePatch(
     description = "Forces the app to report 'plus' permissions to the server."
 ) {
     compatibleWith("com.mladinska.mkplus")
-
+    compatibleWith("com.audiorista.android")
     execute {
         val authUserFingerprint = fingerprint {
             custom { method, classDef ->
