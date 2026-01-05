@@ -4,6 +4,7 @@ import app.revanced.patcher.patch.bytecodePatch
 import app.revanced.patcher.fingerprint
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.iface.ClassDef
 
 @Suppress("unused")
 val unlockModulesPatch = bytecodePatch(
@@ -13,39 +14,49 @@ val unlockModulesPatch = bytecodePatch(
     compatibleWith("com.sovworks.projecteds")
 
     execute {
-        // Fingerprint 1: Find the Enum Class (ModuleVersionStatus)
-        val statusEnumFingerprint = fingerprint {
-            // "Available", "NotPurchased", "NotExists"
-            strings("Available", "NotPurchased")
-            accessFlags(AccessFlags.PUBLIC, AccessFlags.ENUM)
-        }
-
-        // Fingerprint 2: Find the Implementation Class (ModuleManagerImpl)
+        // Fingerprint: Find ModuleManagerImpl by unique string
         val managerFingerprint = fingerprint {
-            // Unique string in constructor: "moduleVersionRepository size "
             strings("moduleVersionRepository size ")
             accessFlags(AccessFlags.PUBLIC, AccessFlags.FINAL)
         }
 
-        val statusEnumClass = statusEnumFingerprint.classDef
         val managerClass = managerFingerprint.classDef
 
-        // A. Get the Enum Field "Available"
-        // We look for the first static field in the Enum that has the Enum's type.
-        // Assuming "Available" is the first defined constant or using the logic from original snippet.
-        val availableField = statusEnumClass.fields.first { 
-            AccessFlags.STATIC.isSet(it.accessFlags) && it.type == statusEnumClass.type
-        }
-
-        // B. Find the method 'mo53916e' (getModuleStatus)
-        // Identify by signature: takes 1 param, returns the StatusEnum
+        // 1. Find the target method (getModuleStatus / mo53916e)
+        // Signature: (LModuleVersion;)LModuleVersionStatus;
+        // Logic: Find a public method that takes 1 parameter and returns a reference type (the Enum).
         val targetMethod = managerClass.methods.first { method ->
-            method.parameterTypes.size == 1 &&
-            method.returnType == statusEnumClass.type
+             AccessFlags.PUBLIC.isSet(method.accessFlags) && 
+             method.parameterTypes.size == 1 &&
+             method.returnType.startsWith("L") && // Returns a class
+             method.returnType != "Ljava/lang/Object;" // Be specific if possible, but the original code implies it returns the Enum directly
         }
 
-        // C. Apply the patch
-        // Replace method body to return the Available field
+        // 2. Resolve the Enum class from the method's return type
+        // The return type is like "Lcom/package/Enum;"
+        // We need to look up this class definition if we were strict, but we just need the type string to find the field.
+        val enumType = targetMethod.returnType
+        
+        // 3. Find the "Available" field in the Enum class
+        // We need to find the class definition for the Enum to be sure, OR we can try to guess it.
+        // Better to look it up from the context.classes if possible, but we don't need to strictly inspect it 
+        // if we assume standard Enum structure (first static field of its own type is usually the first enum value).
+        // However, to be safe and robust (and "idiomatic" as requested), we should try to find the class.
+        val enumClass = classes.firstOrNull { it.type == enumType } 
+            ?: throw IllegalStateException("Could not find Enum class: $enumType")
+
+        // 4. Find the "Available" field
+        // It's a static final field of the same type as the class.
+        // Usually Enums have: static final FieldA, static final FieldB, ... static final $VALUES
+        // We want the first one, which corresponds to the first defined value ("Available" in the user's decompiled code).
+        val availableField = enumClass.fields.first { field ->
+            AccessFlags.STATIC.isSet(field.accessFlags) &&
+            AccessFlags.FINAL.isSet(field.accessFlags) &&
+            AccessFlags.ENUM.isSet(field.accessFlags) &&
+            field.type == enumType
+        }
+
+        // 5. Apply the patch
         targetMethod.addInstructions(
             0,
             """
