@@ -1,3 +1,11 @@
+## [1.0.3](https://github.com/blazskufca/revanced-patch/compare/v1.0.2...v1.0.3) (2026-01-05)
+
+
+### Bug Fixes
+
+* Revert UnlockPlusPatch to modify method implementation ([c8b97b2](https://github.com/blazskufca/revanced-patch/commit/c8b97b275a621b17f4bee236602d6570f47be06a))
+* UnlockPlusPatch to modify method implementation ([94075d8](https://github.com/blazskufca/revanced-patch/commit/94075d8fc2e8fce4924a327071ceb6553d47113c))
+
 ## [1.0.2](https://github.com/blazskufca/revanced-patches/compare/v1.0.1...v1.0.2) (2026-01-05)
 
 
