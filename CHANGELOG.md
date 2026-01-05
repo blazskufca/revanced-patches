@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/blazskufca/revanced-patch/compare/v1.0.3...v1.1.0) (2026-01-05)
+
+
+### Features
+
+* test UnlockModulesPatch for com.sovworks.projecteds ([6547d29](https://github.com/blazskufca/revanced-patch/commit/6547d29664b72acb1dcbbe923dac8be850e68b42))
+
 ## [1.0.3](https://github.com/blazskufca/revanced-patch/compare/v1.0.2...v1.0.3) (2026-01-05)
 
 
