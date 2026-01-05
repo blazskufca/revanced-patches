@@ -1,0 +1,98 @@
+package app.revanced.patches.sovworks.projecteds
+
+import app.revanced.patcher.patch.bytecodePatch
+import app.revanced.patcher.fingerprint
+import app.revanced.patcher.extensions.InstructionExtensions.replaceInstructions
+import app.revanced.patcher.util.proxy.mutableTypes.MutableMethod
+
+@Suppress("unused")
+val bypassNativeIntegrityPatch = bytecodePatch(
+    name = "Bypass Native Integrity",
+    description = "Bypasses native integrity checks by preventing libfusefs.so and liblm.so from loading and stubbing native wrapper methods."
+) {
+    compatibleWith("com.sovworks.projecteds")
+
+    execute {
+        // 1. FuseFS
+        val fuseMatch = fingerprint {
+            custom { method, classDef -> 
+                classDef.type == "Lcom/sovworks/projecteds/data/common/junction/fusefs/BlockingFuseFileSystem;" && method.name == "<clinit>"
+            }
+        }
+        (fuseMatch.method as? MutableMethod)?.replaceInstructions(0, "return-void")
+
+        // 2. LibLM - DeviceTokenProvider
+        val tokenMatch = fingerprint {
+             custom { method, classDef ->
+                classDef.type == "Lcom/sovworks/projecteds/data/feature/lm/DefaultDeviceTokenProvider;" && method.name == "<clinit>"
+            }
+        }
+        val tokenClass = tokenMatch.classDef
+        (tokenClass.methods.find { it.name == "<clinit>" } as? MutableMethod)?.replaceInstructions(0, "return-void")
+        (tokenClass.methods.find { it.name == "a" && it.parameterTypes.size == 1 } as? MutableMethod)?.let { method ->
+             method.replaceInstructions(
+                0,
+                """
+                    const-string v0, "dummy_device_token"
+                    return-object v0
+                """
+            )
+        }
+
+        // 3. LibLM - PublicKeyDataProvider
+        val keyMatch = fingerprint {
+             custom { method, classDef ->
+                classDef.type == "Lcom/sovworks/projecteds/data/feature/lm/DefaultPublicKeyDataProvider;" && method.name == "<clinit>"
+            }
+        }
+        val keyClass = keyMatch.classDef
+        (keyClass.methods.find { it.name == "<clinit>" } as? MutableMethod)?.replaceInstructions(0, "return-void")
+        (keyClass.methods.find { it.name == "a" && it.parameterTypes.isEmpty() } as? MutableMethod)?.let { method ->
+            method.replaceInstructions(
+                0,
+                """
+                    const/4 v0, 0x0
+                    new-array v0, v0, [B
+                    return-object v0
+                """
+            )
+        }
+
+        // 4. LibLM - AesGcmImpl (Decryption)
+        val aesClassMatch = fingerprint {
+             custom { method, classDef ->
+                classDef.type == "Lcom/sovworks/projecteds/data/feature/lm/crypto/AesGcmImpl;" && method.name == "<clinit>"
+            }
+        }
+        val aesClass = aesClassMatch.classDef
+        // Prevent library load in <clinit>
+        (aesClass.methods.find { it.name == "<clinit>" } as? MutableMethod)?.replaceInstructions(0, "return-void")
+        
+        // 5. LibLM - AesGcmImpl$decrypt$1 (Caller of getCipher)
+        // We patch the caller to use CryptoHelper instead of the native method
+        val aesCallerMatch = fingerprint {
+             custom { method, classDef ->
+                classDef.type == "Lcom/sovworks/projecteds/data/feature/lm/crypto/AesGcmImpl\$decrypt\$1;" && method.name == "invokeSuspend"
+            }
+        }
+        val aesCallerMethod = aesCallerMatch.method as? MutableMethod
+        
+        // Find the specific instruction invoking getCipher
+        val instructions = aesCallerMethod?.implementation?.instructions ?: emptyList()
+        instructions.forEachIndexed { index, instruction ->
+            val instrStr = instruction.toString()
+            // Broadened check to ensure we catch the call
+            if (instrStr.contains("AesGcmImpl;->getCipher")) {
+                 // Extract registers from string, e.g., "invoke-static {v0, v1}, ..."
+                 // Regex to capture content between braces
+                 val registersMatch = Regex("\\{([^}]*)\\}").find(instrStr)
+                 val registers = registersMatch?.groupValues?.get(1) ?: "v0, v1" // Fallback (risky but better than nothing)
+                 
+                 aesCallerMethod?.replaceInstructions(
+                    index,
+                    "invoke-static {$registers}, Lapp/revanced/patches/sovworks/projecteds/CryptoHelper;->getCipher([B[B)Ljavax/crypto/Cipher;"
+                )
+            }
+        }
+    }
+}

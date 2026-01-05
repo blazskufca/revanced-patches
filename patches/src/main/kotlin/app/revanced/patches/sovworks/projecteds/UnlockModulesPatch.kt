@@ -2,67 +2,113 @@ package app.revanced.patches.sovworks.projecteds
 
 import app.revanced.patcher.patch.bytecodePatch
 import app.revanced.patcher.fingerprint
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import com.android.tools.smali.dexlib2.AccessFlags
-import com.android.tools.smali.dexlib2.iface.ClassDef
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction11x
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import app.revanced.patcher.extensions.InstructionExtensions.replaceInstructions
 
 @Suppress("unused")
 val unlockModulesPatch = bytecodePatch(
     name = "Unlock Modules",
-    description = "Forces ModuleManager to report all modules as Available."
+    description = "Forces the app to consider all modules as Active."
 ) {
     compatibleWith("com.sovworks.projecteds")
 
     execute {
-        // Fingerprint: Find ModuleManagerImpl by unique string
-        val managerFingerprint = fingerprint {
-            strings("moduleVersionRepository size ")
-            accessFlags(AccessFlags.PUBLIC, AccessFlags.FINAL)
-        }
+        // 1. Find ActivationStatus class via fingerprint
+        val activationStatusType = fingerprint {
+            strings("Active", "Inactive", "Expired")
+        }.classDef.type
 
-        val managerClass = managerFingerprint.classDef
-
-        // 1. Find the target method (getModuleStatus / mo53916e)
-        // Signature: (LModuleVersion;)LModuleVersionStatus;
-        // Logic: Find a public method that takes 1 parameter and returns a reference type (the Enum).
-        val targetMethod = managerClass.methods.first { method ->
-             AccessFlags.PUBLIC.isSet(method.accessFlags) && 
-             method.parameterTypes.size == 1 &&
-             method.returnType.startsWith("L") && // Returns a class
-             method.returnType != "Ljava/lang/Object;" // Be specific if possible, but the original code implies it returns the Enum directly
-        }
-
-        // 2. Resolve the Enum class from the method's return type
-        // The return type is like "Lcom/package/Enum;"
-        // We need to look up this class definition if we were strict, but we just need the type string to find the field.
-        val enumType = targetMethod.returnType
+        val activationStatusClassDef = classes.first { it.type == activationStatusType }
         
-        // 3. Find the "Available" field in the Enum class
-        // We need to find the class definition for the Enum to be sure, OR we can try to guess it.
-        // Better to look it up from the context.classes if possible, but we don't need to strictly inspect it 
-        // if we assume standard Enum structure (first static field of its own type is usually the first enum value).
-        // However, to be safe and robust (and "idiomatic" as requested), we should try to find the class.
-        val enumClass = classes.firstOrNull { it.type == enumType } 
-            ?: throw IllegalStateException("Could not find Enum class: $enumType")
-
-        // 4. Find the "Available" field
-        // It's a static final field of the same type as the class.
-        // Usually Enums have: static final FieldA, static final FieldB, ... static final $VALUES
-        // We want the first one, which corresponds to the first defined value ("Available" in the user's decompiled code).
-        val availableField = enumClass.fields.first { field ->
-            AccessFlags.STATIC.isSet(field.accessFlags) &&
-            AccessFlags.FINAL.isSet(field.accessFlags) &&
-            AccessFlags.ENUM.isSet(field.accessFlags) &&
-            field.type == enumType
+        // 2. Identify Active/Inactive fields (read from immutable definition is fine)
+        val statusFields = activationStatusClassDef.staticFields.filter {
+            it.type == activationStatusClassDef.type
         }
 
-        // 5. Apply the patch
-        targetMethod.addInstructions(
-            0,
-            """
-                sget-object v0, ${availableField.definingClass}->${availableField.name}:${availableField.type}
-                return-object v0
-            """
-        )
+        if (statusFields.size <= 5) {
+            throw IllegalStateException("ActivationStatus class has fewer fields than expected.")
+        }
+        val inactiveField = statusFields[2]
+        val activeField = statusFields[5]
+        
+        val activeFieldSmali = "${activeField.definingClass}->${activeField.name}:${activeField.type}"
+
+        // 3. Find GetModulesActivationStatusInternalUseCase class
+        val internalUseCaseType = fingerprint {
+            strings("allItems", "savedActivations", "deviceToken")
+        }.classDef.type
+        
+        val internalUseCaseClassDef = classes.first { it.type == internalUseCaseType }
+        
+        // Proxy the class to get the mutable version
+        val internalUseCaseClass = proxy(internalUseCaseClassDef).mutableClass
+
+        // 4. Find the target method in the mutable class
+        val targets = internalUseCaseClass.methods.filter { method ->
+            method.parameterTypes.size == 4 &&
+            method.parameterTypes[0] == "Ljava/util/Map;" &&
+            method.parameterTypes[2] == "Ljava/lang/String;" &&
+            method.returnType == "Ljava/util/LinkedHashMap;"
+        }
+
+        // Method from mutableClass.methods is already a MutableMethod
+        val method = targets.firstOrNull() 
+            ?: throw IllegalStateException("Could not find target method in GetModulesActivationStatusInternalUseCase.")
+
+        // 5. Scan instructions to find indices to patch
+        val implementation = method.implementation ?: return@execute
+        val instructions = implementation.instructions
+        
+        // List of patches: (Index, SmaliString)
+        val patches = mutableListOf<Pair<Int, String>>()
+
+        for (i in instructions.indices) {
+            val instruction = instructions[i]
+
+            // Case A: Loading Inactive status (SGET_OBJECT InactiveField) -> SGET_OBJECT ActiveField
+            if (instruction.opcode == Opcode.SGET_OBJECT) {
+                if (instruction is ReferenceInstruction && instruction.reference == inactiveField) {
+                     if (instruction is Instruction21c) {
+                         val reg = instruction.registerA
+                         // Replace SGET Inactive with SGET Active
+                         patches.add(i to "sget-object v$reg, $activeFieldSmali")
+                     }
+                }
+            }
+
+            // Case B: Calculating status via GetModuleActivationStatusUseCase
+            // INVOKE_STATIC (returns ActivationStatus) -> NOP
+            // MOVE_RESULT_OBJECT -> SGET_OBJECT ActiveField
+            if (instruction.opcode == Opcode.INVOKE_STATIC) {
+                if (instruction is ReferenceInstruction) {
+                    val methodRefVal = instruction.reference
+                    if (methodRefVal is MethodReference && methodRefVal.returnType == activationStatusClassDef.type) {
+                        // Check if next instruction is move-result-object
+                         if (i + 1 < instructions.size && instructions[i + 1].opcode == Opcode.MOVE_RESULT_OBJECT) {
+                             // NOP the invoke
+                             patches.add(i to "nop")
+                             
+                             // Replace MOVE_RESULT with SGET_OBJECT ActiveField
+                             val moveResult = instructions[i + 1]
+                             if (moveResult is Instruction11x) {
+                                 val reg = moveResult.registerA
+                                 patches.add((i + 1) to "sget-object v$reg, $activeFieldSmali")
+                             }
+                         }
+                    }
+                }
+            }
+        }
+        
+        // Apply patches in reverse order
+        patches.sortByDescending { it.first }
+        
+        for ((index, smali) in patches) {
+            method.replaceInstructions(index, smali)
+        }
     }
 }
