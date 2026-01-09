@@ -12,50 +12,50 @@
   </picture>
   <br>
   <a href="https://revanced.app/">
-     <picture>
-         <source height="24px" media="(prefers-color-scheme: dark)" srcset="assets/revanced-logo/revanced-logo.svg" />
-         <img height="24px" src="assets/revanced-logo/revanced-logo.svg" />
-     </picture>
-   </a>&nbsp;&nbsp;&nbsp;
-   <a href="https://github.com/ReVanced">
-       <picture>
-           <source height="24px" media="(prefers-color-scheme: dark)" srcset="https://i.ibb.co/dMMmCrW/Git-Hub-Mark.png" />
-           <img height="24px" src="https://i.ibb.co/9wV3HGF/Git-Hub-Mark-Light.png" />
-       </picture>
-   </a>&nbsp;&nbsp;&nbsp;
-   <a href="http://revanced.app/discord">
-       <picture>
-           <source height="24px" media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/13122796/178032563-d4e084b7-244e-4358-af50-26bde6dd4996.png" />
-           <img height="24px" src="https://user-images.githubusercontent.com/13122796/178032563-d4e084b7-244e-4358-af50-26bde6dd4996.png" />
-       </picture>
-   </a>&nbsp;&nbsp;&nbsp;
-   <a href="https://reddit.com/r/revancedapp">
-       <picture>
-           <source height="24px" media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/13122796/178032351-9d9d5619-8ef7-470a-9eec-2744ece54553.png" />
-           <img height="24px" src="https://user-images.githubusercontent.com/13122796/178032351-9d9d5619-8ef7-470a-9eec-2744ece54553.png" />
-       </picture>
-   </a>&nbsp;&nbsp;&nbsp;
-   <a href="https://t.me/app_revanced">
       <picture>
-         <source height="24px" media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/13122796/178032213-faf25ab8-0bc3-4a94-a730-b524c96df124.png" />
-         <img height="24px" src="https://user-images.githubusercontent.com/13122796/178032213-faf25ab8-0bc3-4a94-a730-b524c96df124.png" />
+          <source height="24px" media="(prefers-color-scheme: dark)" srcset="assets/revanced-logo/revanced-logo.svg" />
+          <img height="24px" src="assets/revanced-logo/revanced-logo.svg" />
       </picture>
-   </a>&nbsp;&nbsp;&nbsp;
-   <a href="https://x.com/revancedapp">
-      <picture>
-         <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/93124920/270180600-7c1b38bf-889b-4d68-bd5e-b9d86f91421a.png">
-         <img height="24px" src="https://user-images.githubusercontent.com/93124920/270108715-d80743fa-b330-4809-b1e6-79fbdc60d09c.png" />
-      </picture>
-   </a>&nbsp;&nbsp;&nbsp;
-   <a href="https://www.youtube.com/@ReVanced">
-      <picture>
-         <source height="24px" media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/13122796/178032714-c51c7492-0666-44ac-99c2-f003a695ab50.png" />
-         <img height="24px" src="https://user-images.githubusercontent.com/13122796/178032714-c51c7492-0666-44ac-99c2-f003a695ab50.png" />
-      </picture>
-   </a>
-   <br>
-   <br>
-   Continuing the legacy of Vanced
+    </a>&nbsp;&nbsp;&nbsp;
+    <a href="https://github.com/ReVanced">
+        <picture>
+            <source height="24px" media="(prefers-color-scheme: dark)" srcset="https://i.ibb.co/dMMmCrW/Git-Hub-Mark.png" />
+            <img height="24px" src="https://i.ibb.co/9wV3HGF/Git-Hub-Mark-Light.png" />
+        </picture>
+    </a>&nbsp;&nbsp;&nbsp;
+    <a href="http://revanced.app/discord">
+        <picture>
+            <source height="24px" media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/13122796/178032563-d4e084b7-244e-4358-af50-26bde6dd4996.png" />
+            <img height="24px" src="https://user-images.githubusercontent.com/13122796/178032563-d4e084b7-244e-4358-af50-26bde6dd4996.png" />
+        </picture>
+    </a>&nbsp;&nbsp;&nbsp;
+    <a href="https://reddit.com/r/revancedapp">
+        <picture>
+            <source height="24px" media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/13122796/178032351-9d9d5619-8ef7-470a-9eec-2744ece54553.png" />
+            <img height="24px" src="https://user-images.githubusercontent.com/13122796/178032351-9d9d5619-8ef7-470a-9eec-2744ece54553.png" />
+        </picture>
+    </a>&nbsp;&nbsp;&nbsp;
+    <a href="https://t.me/app_revanced">
+       <picture>
+          <source height="24px" media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/13122796/178032213-faf25ab8-0bc3-4a94-a730-b524c96df124.png" />
+          <img height="24px" src="https://user-images.githubusercontent.com/13122796/178032213-faf25ab8-0bc3-4a94-a730-b524c96df124.png" />
+       </picture>
+    </a>&nbsp;&nbsp;&nbsp;
+    <a href="https://x.com/revancedapp">
+       <picture>
+          <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/93124920/270180600-7c1b38bf-889b-4d68-bd5e-b9d86f91421a.png">
+          <img height="24px" src="https://user-images.githubusercontent.com/93124920/270108715-d80743fa-b330-4809-b1e6-79fbdc60d09c.png" />
+       </picture>
+    </a>&nbsp;&nbsp;&nbsp;
+    <a href="https://www.youtube.com/@ReVanced">
+       <picture>
+          <source height="24px" media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/13122796/178032714-c51c7492-0666-44ac-99c2-f003a695ab50.png" />
+          <img height="24px" src="https://user-images.githubusercontent.com/13122796/178032714-c51c7492-0666-44ac-99c2-f003a695ab50.png" />
+       </picture>
+    </a>
+    <br>
+    <br>
+    Continuing the legacy of Vanced
 </p>
 
 # 🧩 ReVanced Patches
@@ -71,17 +71,44 @@ The following patches are included in this repository:
 | Application | Patch Name | Description |
 | ----------- | ---------- | ----------- |
 | **Mladinska Plus** (`com.mladinska.mkplus`) | `Unlock Plus` | Forces the app to report 'plus' permissions to the server. |
+| **Projected EDS** (`com.sovworks.projecteds`) | `Unlock EDS` | Bytecode and native library patches to bypass license and obfuscation checks. |
 
+---
+
+## 🛠️ Automated Native Patching (Projected EDS)
+
+Unlike standard patches, **Projected EDS** requires modifications to native `.so` libraries. This repository includes an automated Ghidra-based workflow for this purpose.
+
+### Prerequisites
+- **Ghidra**: Must be installed and available in your `PATH` (specifically `ghidra-analyzeHeadless`).
+- **Android SDK**: `ANDROID_HOME` should be set or Build Tools must be in your path.
+
+### Usage (Portable Script)
+The script `ghidra/patch-eds.sh` automates the entire process: building the patches, decompiling the APK, patching native libraries with Ghidra, and merging everything into a signed APK.
+
+```bash
+# Provide the path to your original APK as an argument
+./ghidra/patch-eds.sh "com.sovworks.projecteds v1.16.75_antisplit.apk"
+```
 
 ## 🚀 How to use
 
+
+
 To usage these patches, you need to bundle them.
 
+
+
 1. Clone this repository
+
 2. Build the patches using `./gradlew patches:build`
+
 3. Use the generated `.jar` file with ReVanced Manager or CLI.
 
+
+
 ## Import into ReVanced Manager
+
 <img alt="Use alternative sources" src="https://github.com/user-attachments/assets/0266081f-3dc4-4e1b-858d-a576b1c3f71d" />
 
-<img alt="Configure alternative source" src="https://github.com/user-attachments/assets/c4abf13b-a682-46cd-bac3-6cb476ce2d78" />
+<img alt="Configure alternative source" src="https://github.com/user-attachments/assets/836dab96-a688-4a9e-8349-205f7fbf6f06" />
