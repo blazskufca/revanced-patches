@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/blazskufca/revanced-patch/compare/v1.1.1...v1.2.0) (2026-01-09)
+
+
+### Features
+
+* Unlock com.sovworks.eds ([b0a8ad6](https://github.com/blazskufca/revanced-patch/commit/b0a8ad6f7cefa6a414e1d9d74672769dd4466c60))
+
 ## [1.1.1](https://github.com/blazskufca/revanced-patch/compare/v1.1.0...v1.1.1) (2026-01-05)
 
 
